@@ -20,6 +20,7 @@ constructor(props) {
   this.onChangeInput = this.onChangeInput.bind(this);
   this.onSubmit = this.onSubmit.bind(this);
   this.onRandomSubmit = this.onRandomSubmit.bind(this);
+  this.renderCard = this.renderCard.bind(this);
 
   
 }
@@ -62,18 +63,38 @@ onSubmit(e) {
   
   axios.get(`https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=` + this.state.input)
   .then((response) => {
-      // console.log(response);
-      response.data.drinks.forEach(element => axios.get(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=` + element.idDrink)
+      if(response.data) {
+        response.data.drinks.forEach(element => axios.get(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=` + element.idDrink)
       .then((res) => {
         this.setState({
           cocktailSearch: [...this.state.cocktailSearch, res.data]
         }) 
       }))
+      } else {
+        return <div>No results.</div>
+      }
+      
     })
 
   this.setState({
     cocktailSearch: []
   });
+}
+renderCard(){
+    this.state.cocktailSearch.map((info, key) => { 
+      return (
+      <div key={key}> 
+      <ResultCard 
+        name={info.drinks[0].strDrink} 
+        img={info.drinks[0].strDrinkThumb} 
+        ing1={info.drinks[0].strIngredient1} 
+        ing2={info.drinks[0].strIngredient2} 
+        ing3={info.drinks[0].strIngredient3} 
+        ing4={info.drinks[0].strIngredient4}/> 
+      </div>)})
+ 
+
+  
 }
 
 
@@ -81,7 +102,7 @@ onSubmit(e) {
 
   render() { 
     return (
-      <div style={{display: 'flex', flexDirection: 'column', justifyContent:'center', alignItems: 'center'}}>
+      <div style={{display: 'flex', flexDirection: 'column', justifyContent:'center', alignItems: 'center', margin: 50}}>
         
         <div>
         <h1>Liquor Cabinet</h1>
@@ -100,10 +121,25 @@ onSubmit(e) {
         </form>
         </div>
         
-        <div style={{width: 1920, display: 'flex', flexFlow:'row wrap', justifyContent: 'center'}}>
-          {this.state.cocktailSearch.map((info, key) => { return (<div key={key}> <ResultCard name={info.drinks[0].strDrink} img={info.drinks[0].strDrinkThumb} ing1={info.drinks[0].strIngredient1} ing2={info.drinks[0].strIngredient2} ing3={info.drinks[0].strIngredient3} ing4={info.drinks[0].strIngredient4}/> </div>)})}
+        
+        <div>
+          { //Check if message failed
+            (this.state.cocktailSearch.length === 0)
+              ? <div> No results </div> 
+              : <div style={{width: 1920, display: 'flex', flexFlow:'row wrap', justifyContent: 'center'}}> {this.state.cocktailSearch.map((info, key) => { 
+                return (
+                <div key={key} > 
+                <ResultCard 
+                  name={info.drinks[0].strDrink} 
+                  img={info.drinks[0].strDrinkThumb} 
+                  ing1={info.drinks[0].strIngredient1} 
+                  ing2={info.drinks[0].strIngredient2} 
+                  ing3={info.drinks[0].strIngredient3} 
+                  ing4={info.drinks[0].strIngredient4}/> 
+                </div>)}) } </div> 
+        }
+    
         </div>
-
 
         <Modal  />
         </div>
